@@ -414,7 +414,7 @@ void clean_folder(const filename *folder)
 }
 
 
-void traverse_and_build(filename const *current_directory, const filename *build_directory)
+void traverse_and_build(filename const *root_directory, const filename *build_directory, filename const *current_directory)
 {
 	if(!sub_directory((filename *)TESTS_FOLDER, current_directory))
 	{
@@ -435,10 +435,11 @@ void traverse_and_build(filename const *current_directory, const filename *build
 					compile_file(&entry, build_directory);
 
 				else if(is_directory(&entry))
-					traverse_and_build(&entry, build_directory);
+					traverse_and_build(root_directory, build_directory, &entry);
 			}
 
-			chdir(PARENT_DIR);
+			if(!same_directory(current_directory, root_directory))
+				chdir(PARENT_DIR);
 
 			closedir(d);
 		}
@@ -537,9 +538,7 @@ void buildall(filename *files, const filename *root)
 
 		append_directory(&build_directory, (filename *)BUILD_FOLDER);
 
-		traverse_and_build(root, &build_directory);
-
-		chdir((char *)root);
+		traverse_and_build(root, &build_directory, root);
 	}
 
 	return;
